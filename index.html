@@ -14,93 +14,197 @@
       margin: 0;
       min-height: 100vh;
       display: flex;
-      align-items: center;
       justify-content: center;
+      align-items: center;
       background: #111827;
       font-family: Arial, sans-serif;
       color: white;
     }
 
     .box {
-      width: 90%;
+      width: 92%;
       max-width: 500px;
       padding: 30px;
       background: #1f2937;
       border-radius: 20px;
       text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,.3);
+    }
+
+    h1 {
+      margin-top: 0;
     }
 
     input {
       width: 100%;
       padding: 15px;
+      margin: 15px 0;
       border: none;
       border-radius: 10px;
-      margin: 15px 0;
       font-size: 16px;
     }
 
     button {
-      padding: 15px 25px;
+      padding: 14px 24px;
       border: none;
       border-radius: 10px;
       background: #2563eb;
       color: white;
       font-size: 16px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .6;
     }
 
     #resultado {
       margin-top: 20px;
       word-break: break-all;
     }
+
+    .link {
+      color: #60a5fa;
+    }
+
+    .erro {
+      color: #f87171;
+    }
   </style>
 </head>
 
 <body>
 
-  <div class="box">
-    <h1>🔗 Meu Encurtador</h1>
+<div class="box">
 
-    <p>Digite o link que deseja encurtar:</p>
+  <h1>🔗 Meu Encurtador</h1>
 
-    <input
-      type="url"
-      id="link"
-      placeholder="https://exemplo.com"
-    >
+  <p>Coloque seu link abaixo:</p>
 
-    <button onclick="encurtar()">
-      Criar link curto
-    </button>
+  <input
+    type="url"
+    id="link"
+    placeholder="https://exemplo.com"
+  >
 
-    <div id="resultado"></div>
-  </div>
+  <button id="botao" onclick="encurtar()">
+    Criar link curto
+  </button>
 
-  <script>
-    function encurtar() {
-      const link = document.getElementById("link").value.trim();
+  <div id="resultado"></div>
 
-      if (!link) {
-        alert("Digite um link primeiro!");
-        return;
-      }
+</div>
 
-      const codigo = Math.random()
-        .toString(36)
-        .substring(2, 8);
+<!-- Firebase -->
+<script type="module">
+
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp
+  }
+  from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDpVWRIVNcGQJBe9aN4tYh1YGazFos8I8U",
+    authDomain: "meu-encurtador-73323.firebaseapp.com",
+    projectId: "meu-encurtador-73323",
+    storageBucket: "meu-encurtador-73323.firebasestorage.app",
+    messagingSenderId: "1002094370708",
+    appId: "1:1002094370708:web:d5e24e6586e1fce7dbb981",
+    measurementId: "G-KX07K5GMML"
+  };
+
+
+  const app = initializeApp(firebaseConfig);
+
+  const db = getFirestore(app);
+
+
+  window.encurtar = async function() {
+
+    const input = document.getElementById("link");
+    const resultado = document.getElementById("resultado");
+    const botao = document.getElementById("botao");
+
+    const url = input.value.trim();
+
+    if (!url) {
+      resultado.innerHTML =
+        "<p class='erro'>Digite um link primeiro.</p>";
+      return;
+    }
+
+    try {
+
+      new URL(url);
+
+    } catch {
+
+      resultado.innerHTML =
+        "<p class='erro'>Digite uma URL válida.</p>";
+
+      return;
+    }
+
+
+    botao.disabled = true;
+    botao.textContent = "Criando...";
+
+
+    try {
+
+      const documento = await addDoc(
+        collection(db, "links"),
+        {
+          url: url,
+          createdAt: serverTimestamp(),
+          clicks: 0
+        }
+      );
+
 
       const linkCurto =
         window.location.origin +
         window.location.pathname +
-        "#" +
-        codigo;
+        "?id=" +
+        documento.id;
 
-      document.getElementById("resultado").innerHTML =
-        "<p>Seu link curto:</p>" +
-        "<a href='" + linkCurto + "' style='color:#60a5fa'>" +
-        linkCurto +
-        "</a>";
+
+      resultado.innerHTML = `
+        <p>Seu link curto:</p>
+
+        <a
+          class="link"
+          href="${linkCurto}"
+          target="_blank"
+        >
+          ${linkCurto}
+        </a>
+      `;
+
+
+    } catch (erro) {
+
+      console.error(erro);
+
+      resultado.innerHTML =
+        "<p class='erro'>Não foi possível criar o link. Verifique o Firestore.</p>";
+
     }
-  </script>
+
+
+    botao.disabled = false;
+    botao.textContent = "Criar link curto";
+
+  };
+
+</script>
 
 </body>
 </html>
