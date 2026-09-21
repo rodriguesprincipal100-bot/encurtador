@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Meu Encurtador</title>
+
+<style>
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #111827;
+    font-family: Arial, sans-serif;
+    color: white;
+}
+
+.box {
+    width: 90%;
+    max-width: 500px;
+    padding: 30px;
+    background: #1f2937;
+    border-radius: 20px;
+    text-align: center;
+}
+
+input {
+    width: 90%;
+    padding: 15px;
+    border: 0;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+button {
+    padding: 15px 25px;
+    border: 0;
+    border-radius: 10px;
+    background: #2563eb;
+    color: white;
+    font-size: 16px;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>🔗 Meu Encurtador</h1>
+
+<p>Coloque seu link abaixo:</p>
+
+<input
+type="url"
+id="link"
+placeholder="https://seusite.com"
+>
+
+<br>
+
+<button onclick="encurtar()">
+Criar link curto
+</button>
+
+<p id="resultado"></p>
+
+</div>
+
+<script>
+
+function encurtar() {
+
+    const link = document.getElementById("link").value;
+
+    if (!link) {
+        alert("Digite um link primeiro!");
+        return;
+    }
+
+    const codigo =
+        Math.random().toString(36).substring(2, 8);
+
+    const curto =
+        window.location.origin + "/#" + codigo;
+
+    document.getElementById("resultado").innerHTML =
+        "Seu link curto:<br><br>" +
+        "<a href='" + curto + "' style='color:#60a5fa'>" +
+        curto +
+        "</a>";
+}
+
+</script>
+
+</body>
+</html>
